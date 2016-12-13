@@ -6,7 +6,7 @@ Resteasy 二次开发
     - [需求背景](#需求背景)
     - [实现方案](#实现方案)
 
-### 需求背景
+## 需求背景
 
 Resteasy原生的JSON反序列化，使用的是Jackson的ObjectReader，基于流式风格的JSON反序列化，且ObjectReader没有做定制化的反序列化配置。
 
@@ -19,7 +19,7 @@ Resteasy原生的JSON反序列化，使用的是Jackson的ObjectReader，基于�
 
 这些特性，其实Jackson都支持，只需要对ObjectReader做一些属性的配置。
 
-### 实现方案
+## 实现方案
 
 #### Resteasy序列化组件加载原理
 
