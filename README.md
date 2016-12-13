@@ -6,7 +6,7 @@ Resteasy 二次开发
     - [需求背景](#需求背景)
     - [实现方案](#实现方案)
 
-# 需求背景
+### 需求背景
 
 Resteasy原生的JSON反序列化，使用的是Jackson的ObjectReader，基于流式风格的JSON反序列化，且ObjectReader没有做定制化的反序列化配置。
 
@@ -19,9 +19,9 @@ Resteasy原生的JSON反序列化，使用的是Jackson的ObjectReader，基于�
 
 这些特性，其实Jackson都支持，只需要对ObjectReader做一些属性的配置。
 
-# 实现方案
+### 实现方案
 
-## Resteasy序列化组件加载原理
+#### Resteasy序列化组件加载原理
 
 - ResteasyBootstrap.contextInitialized()
     - deployment = config.createDeployment()，创建ResteasyDeployment，此对象完成组件的初始化
@@ -32,7 +32,7 @@ Resteasy原生的JSON反序列化，使用的是Jackson的ObjectReader，基于�
         - RegisterBuiltin.register(providerFactory)，加载项目中META-INF\services下，声明的默认扩展组件
             - registerProviders(factory)，实现组件初始化的核心逻辑，方案1的实现原理
 
-## 定制化方案实现原理
+#### 定制化方案实现原理
 
 方案1、重写Resteasy的核心类ResteasyBootstrap、ResteasyDeployment、RegisterBuiltin，在RegisterBuiltin加载序列化组件时，替换成自定义的组件。
 
