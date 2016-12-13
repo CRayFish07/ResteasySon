@@ -1,0 +1,68 @@
+package com.yollock.resteasy.boostrap;
+
+import org.jboss.resteasy.resteasy_jaxrs.i18n.LogMessages;
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
+
+import javax.ws.rs.ext.Providers;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.LinkedHashSet;
+
+/**
+ * Created by yangbo12 on 2016/12/2.
+ */
+public class YolRegisterBuiltin {
+
+    private static final String DEFAULT_JSON_PROVIVER = "org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider";
+    private static final String CUSTOM_JSON_PROVIVER = "com.yollock.resteasy.provider.YolRestEasyJackson2Provider";
+
+
+    public static void register(ResteasyProviderFactory factory) {
+        synchronized (factory) {
+            if (factory.isBuiltinsRegistered() || !factory.isRegisterBuiltins()) return;
+            try {
+                registerProviders(factory);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            factory.setBuiltinsRegistered(true);
+        }
+    }
+
+    public static void registerProviders(ResteasyProviderFactory factory) throws Exception {
+        Enumeration<URL> en = Thread.currentThread().getContextClassLoader().getResources("META-INF/services/" + Providers.class.getName());
+        LinkedHashSet<String> set = new LinkedHashSet<String>();
+        while (en.hasMoreElements()) {
+            URL url = en.nextElement();
+            InputStream is = url.openStream();
+            try {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    line = line.trim();
+                    if (line.equals("")) continue;
+                    set.add(line);
+                }
+            } finally {
+                is.close();
+            }
+        }
+        // 过滤掉RestEasyJackson2Provider,添加自定义的
+        set.remove(DEFAULT_JSON_PROVIVER);
+        set.add(CUSTOM_JSON_PROVIVER);
+        for (String line : set) {
+            try {
+                Class clazz = Thread.currentThread().getContextClassLoader().loadClass(line);
+                factory.registerProvider(clazz, true);
+            } catch (NoClassDefFoundError e) {
+                LogMessages.LOGGER.noClassDefFoundErrorError(line, e);
+            } catch (ClassNotFoundException e) {
+                LogMessages.LOGGER.classNotFoundException(line);
+            }
+        }
+    }
+
+}
